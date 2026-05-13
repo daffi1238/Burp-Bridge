@@ -142,6 +142,7 @@ public class Handlers {
 
         Map<String, String> params = parseQuery(ex.getRequestURI().getRawQuery());
         String prefix = params.get("prefix");
+        String hostFilter = params.get("host");
 
         List<HttpRequestResponse> all = api.siteMap().requestResponses();
         List<Map<String, Object>> items = new ArrayList<>();
@@ -149,6 +150,8 @@ public class Handlers {
         for (HttpRequestResponse entry : all) {
             HttpRequest req = entry.request();
             if (req == null) continue;
+
+            if (hostFilter != null && !req.httpService().host().contains(hostFilter)) continue;
 
             String url = req.url();
             if (prefix != null && !url.startsWith(prefix)) continue;
@@ -158,6 +161,7 @@ public class Handlers {
             Map<String, Object> item = new HashMap<>();
             item.put("url", url);
             item.put("method", req.method());
+            item.put("host", req.httpService().host());
             item.put("status", resp != null ? resp.statusCode() : null);
             items.add(item);
         }
